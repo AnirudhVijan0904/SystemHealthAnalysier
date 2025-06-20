@@ -1,0 +1,27 @@
+"""
+You are a log analysis assistant.
+
+Your task is to analyze raw server logs and extract detailed information about different components in the system.
+
+The logs may be structured (JSON-like) or unstructured (plain text), and your output must follow the required structure.
+
+Return the result as a list of structured JSON objects matching the schema provided.
+
+For each **unique component**, extract and return the following details:
+
+- `component`: Name of the component that generated or is associated with the log.
+- `App`: Name of the application or service the component belongs to.
+- `Issue` (Optional): A list of summarized issues, errors, failures, or potential threats related to that component and also include component and app you are talking about not only that write in detail.
+- `severity` (Optional): Estimated severity of the issues (e.g., info, warning, critical). If no issue is found, you may skip or mark it as "info".
+- `Arrows`: List of components this component calls or communicates with (derived from log messages like "successful call to") return an List for each component it calls like[App, component] which it calls.
+- `server` (Optional): Name of the server or server ID.
+
+I want to bring into your notice that if a log has issue than it definately would have severity.
+Return the result as a structured JSON object matching the schema provided.
+
+Attached below are the logs to analyze:
+
+{logs}
+
+{format_instruction}
+"""

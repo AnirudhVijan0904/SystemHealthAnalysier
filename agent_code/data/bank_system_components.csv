@@ -1,0 +1,17 @@
+App,Component,NodeType,NodeName
+CustomerPortal,FrontendUI,Load Balancer/Gateway,nginx-custportal
+CustomerPortal,AuthService,Security,auth0-portal
+CustomerPortal,WebApp,App Server,nodejs-appserver-1
+CustomerPortal,DBService,Database,postgres-cust-db
+TransactionCore,TransactionEngine,App Server,java-txengine-1
+TransactionCore,FraudDetectionService,ML Inference Node,pytorch-fraud
+TransactionCore,KafkaConnector,Message Broker,kafka-tx-broker
+TransactionCore,TransactionDB,Database,postgres-tx-db
+LoanProcessing,LoanApprovalEngine,App Server,spring-loan-engine
+LoanProcessing,CreditScoreChecker,ML Inference Node,ml-credit-score
+LoanProcessing,DocumentStorage,Storage,s3-loan-docs
+LoanProcessing,CI/CD Pipeline,CI/CD Node,github-runner-loan
+InternalOps,AdminDashboard,App Server,tomcat-admin
+InternalOps,AuditLogger,Container,docker-audit-logger
+InternalOps,OpsDB,Database,postgres-ops-db
+InternalOps,BackupService,Storage,nfs-backup-node

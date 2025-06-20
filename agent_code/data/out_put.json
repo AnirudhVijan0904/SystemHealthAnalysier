@@ -1,0 +1,282 @@
+[
+  {
+    "component": "FrontendUI",
+    "App": "CustomerPortal",
+    "Issue": [
+      "FrontendUI of CustomerPortal encountered issues while attempting to communicate with WebApp of CustomerPortal. This could indicate a problem with the UI's ability to interact with the application's core web components, potentially affecting user experience and functionality. This issue can lead to various problems such as inability to load or display information, failure to submit form data, or complete critical tasks.",
+      "FrontendUI of CustomerPortal may be experiencing a problem while communicating with AuthService of CustomerPortal, resulting in potential authentication or authorization failures. This can disrupt user sessions and prevent access to protected resources within the CustomerPortal application, including inability to login or to access secured resources."
+    ],
+    "severity": [
+      "ERROR",
+      "INFO"
+    ],
+    "Arrows": [
+      [
+        "CustomerPortal",
+        "WebApp"
+      ],
+      [
+        "CustomerPortal",
+        "AuthService"
+      ]
+    ],
+    "server": null
+  },
+  {
+    "component": "WebApp",
+    "App": "CustomerPortal",
+    "Issue": [
+      "WebApp of CustomerPortal is failing to connect with TransactionEngine of TransactionCore, potentially leading to payment processing or transaction-related failures. This can result in incomplete transactions, data inconsistencies, and a negative impact on the user experience, affecting a critical part of the business functionality."
+    ],
+    "severity": [
+      "ERROR"
+    ],
+    "Arrows": [
+      [
+        "CustomerPortal",
+        "DBService"
+      ],
+      [
+        "TransactionCore",
+        "TransactionEngine"
+      ]
+    ],
+    "server": null
+  },
+  {
+    "component": "AuthService",
+    "App": "CustomerPortal",
+    "Issue": [],
+    "severity": [
+      "info"
+    ],
+    "Arrows": [
+      [
+        "InternalOps",
+        "AuditLogger"
+      ]
+    ],
+    "server": null
+  },
+  {
+    "component": "DBService",
+    "App": "CustomerPortal",
+    "Issue": [],
+    "severity": [
+      "info"
+    ],
+    "Arrows": [],
+    "server": null
+  },
+  {
+    "component": "TransactionEngine",
+    "App": "TransactionCore",
+    "Issue": [
+      "TransactionEngine of TransactionCore is failing to communicate with LoanApprovalEngine of LoanProcessing, possibly leading to delays or failures in loan processing. This could affect the loan approval workflow, resulting in financial losses and customer dissatisfaction by impacting the critical process of loan approval."
+    ],
+    "severity": [
+      "ERROR"
+    ],
+    "Arrows": [
+      [
+        "TransactionCore",
+        "FraudDetectionService"
+      ],
+      [
+        "TransactionCore",
+        "TransactionDB"
+      ],
+      [
+        "LoanProcessing",
+        "LoanApprovalEngine"
+      ]
+    ],
+    "server": null
+  },
+  {
+    "component": "FraudDetectionService",
+    "App": "TransactionCore",
+    "Issue": [],
+    "severity": [
+      "info"
+    ],
+    "Arrows": [
+      [
+        "LoanProcessing",
+        "CreditScoreChecker"
+      ]
+    ],
+    "server": null
+  },
+  {
+    "component": "TransactionDB",
+    "App": "TransactionCore",
+    "Issue": [],
+    "severity": [
+      "info"
+    ],
+    "Arrows": [],
+    "server": null
+  },
+  {
+    "component": "AdminDashboard",
+    "App": "InternalOps",
+    "Issue": [],
+    "severity": [
+      "info"
+    ],
+    "Arrows": [
+      [
+        "InternalOps",
+        "AuditLogger"
+      ]
+    ],
+    "server": null
+  },
+  {
+    "component": "AuditLogger",
+    "App": "InternalOps",
+    "Issue": [],
+    "severity": [
+      "info"
+    ],
+    "Arrows": [
+      [
+        "TransactionCore",
+        "KafkaConnector"
+      ]
+    ],
+    "server": null
+  },
+  {
+    "component": "CI/CD Pipeline",
+    "App": "LoanProcessing",
+    "Issue": [],
+    "severity": [
+      "info"
+    ],
+    "Arrows": [
+      [
+        "InternalOps",
+        "BackupService"
+      ]
+    ],
+    "server": null
+  },
+  {
+    "component": "LoanApprovalEngine",
+    "App": "LoanProcessing",
+    "Issue": [
+      "LoanApprovalEngine of LoanProcessing is experiencing issues because of server load, leading to potential application performance problems or complete failures. This can cause delays in loan approvals, and have a direct impact on the user experience and business operations, and can potentially lead to financial losses.",
+      "LoanApprovalEngine of LoanProcessing is experiencing issues while attempting to communicate with OpsDB of InternalOps which may lead to potential failure in data storage and retrieval operations. This could result in data inconsistencies and affect the integrity of the loan processing workflow."
+    ],
+    "severity": [
+      "ERROR",
+      "INFO"
+    ],
+    "Arrows": [
+      [
+        "CustomerPortal",
+        "AuthService"
+      ],
+      [
+        "InternalOps",
+        "OpsDB"
+      ]
+    ],
+    "server": null
+  },
+  {
+    "component": "CreditScoreChecker",
+    "App": "LoanProcessing",
+    "Issue": [],
+    "severity": [
+      "info"
+    ],
+    "Arrows": [
+      [
+        "InternalOps",
+        "AuditLogger"
+      ]
+    ],
+    "server": null
+  },
+  {
+    "component": "BackupService",
+    "App": "InternalOps",
+    "Issue": [],
+    "severity": [
+      "info"
+    ],
+    "Arrows": [],
+    "server": null
+  },
+  {
+    "component": "OpsDB",
+    "App": "InternalOps",
+    "Issue": [],
+    "severity": [
+      "info"
+    ],
+    "Arrows": [],
+    "server": null
+  },
+  {
+    "component": "KafkaConnector",
+    "App": "TransactionCore",
+    "Issue": [],
+    "severity": [
+      "info"
+    ],
+    "Arrows": [
+      [
+        "InternalOps",
+        "AuditLogger"
+      ]
+    ],
+    "server": null
+  },
+  {
+    "component": "CreditScoreChecker",
+    "App": "LoanProcessing",
+    "Issue": null,
+    "severity": null,
+    "Arrows": [
+      [
+        "InternalOps",
+        "AuditLogger"
+      ]
+    ],
+    "server": null
+  },
+  {
+    "component": "WebApp",
+    "App": "CustomerPortal",
+    "Issue": [
+      "WebApp of CustomerPortal encountered issues while attempting to call LoanApprovalEngine of LoanProcessing. This indicates a potential problem in the loan approval process, possibly due to network issues, service unavailability, or errors within the LoanApprovalEngine. The repeated nature of these issues suggests a systemic problem that requires immediate attention."
+    ],
+    "severity": [
+      "ERROR"
+    ],
+    "Arrows": [
+      [
+        "LoanProcessing",
+        "LoanApprovalEngine"
+      ]
+    ],
+    "server": null
+  },
+  {
+    "component": "BackupService",
+    "App": "InternalOps",
+    "Issue": null,
+    "severity": null,
+    "Arrows": [
+      [
+        "CustomerPortal",
+        "DBService"
+      ]
+    ],
+    "server": null
+  }
+]
