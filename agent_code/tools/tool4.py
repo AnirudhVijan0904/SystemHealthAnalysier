@@ -1,14 +1,32 @@
 import pandas as pd
 import json
 import os
+import shutil
 from langchain_core.tools import tool
 from graphviz import Digraph
 from agent_code.tools.tool2 import run_common_llm_tasks
 from agent_code.tools.tool1 import extract_file_paths
 from agent_code.utils.correlation import correlate_logs_with_servers
+from agent_code.utils.diagram_svg import render_architecture_svg
 
-@tool
-def generate_deployment_diagram() -> dict:
+
+def ensure_graphviz_on_path():
+    if shutil.which("dot"):
+        return shutil.which("dot")
+    candidates = [
+        r"C:\Program Files (x86)\Graphviz\bin\dot.exe",
+        r"C:\Program Files\Graphviz\bin\dot.exe",
+        os.path.expandvars(r"%LOCALAPPDATA%\Programs\Graphviz\bin\dot.exe"),
+    ]
+    for exe in candidates:
+        if os.path.isfile(exe):
+            bin_dir = os.path.dirname(exe)
+            os.environ["PATH"] = bin_dir + os.pathsep + os.environ.get("PATH", "")
+            return exe
+    return None
+
+
+def build_deployment_diagram() -> dict:
     """
     Generates a deployment diagram using the system mapping CSV (with NodeName) and enriched logs.
     Components are grouped under servers, and edges are based on inter-component arrows.
@@ -143,7 +161,7 @@ def generate_deployment_diagram() -> dict:
        
 
                 # === Step 6: Parse severity info from enriched logs ===
-        with open(enriched_log_path) as f:
+        with open(enriched_log_path, encoding="utf-8") as f:
             logs = json.load(f)
 
         severity_map = {}
@@ -206,60 +224,68 @@ def generate_deployment_diagram() -> dict:
                         src_sev = severity_map.get(source)
                         tgt_sev = severity_map.get(target)
 
-                        if src_sev == tgt_sev:
-                            color = {
-                                "error": "red",
-                                "warn": "orange",
-                                "info": "green"
-                            }.get(src_sev, "black")  # default to black if severity missing
+                        if src_sev == "error" or tgt_sev == "error":
+                            color = "red"
+                        elif src_sev in {"warn", "warning"} or tgt_sev in {"warn", "warning"}:
+                            color = "orange"
+                        else:
+                            color = "green"
+                        dot.edge(source, target, color=color)
+                        edges_added.add(edge)
 
-                            dot.edge(source, target, color=color)
-                            edges_added.add(edge)
+        svg_path = output_image_path + ".svg"
+        render_architecture_svg(
+            servers,
+            node_labels,
+            list(edges_added),
+            severity_map,
+            svg_path,
+        )
 
-        # === Step 7: Draw edges from enriched logs ===
-        # with open(enriched_log_path) as f:
-        #     logs = json.load(f)
+        ensure_graphviz_on_path()
+        png_path = output_image_path + ".png"
+        graphviz_error = None
+        try:
+            rendered = dot.render(output_image_path, format="png", view=False)
+            if rendered and os.path.exists(rendered):
+                png_path = rendered
+        except Exception as render_error:
+            graphviz_error = str(render_error)
+            png_path = None
 
-        # edges_added = set()
-        # for entry in logs:
-        #     app = str(entry.get("App", "")).strip().lower()
-        #     comp = str(entry.get("component", "")).strip().lower()
-        #     source = f"{app}_{comp}"
+        os.makedirs("static", exist_ok=True)
+        public_svg = os.path.join("static", "final_output.svg")
+        shutil.copyfile(svg_path, public_svg)
+        public_png = os.path.join("static", "final_output.png")
+        if png_path and os.path.exists(png_path):
+            shutil.copyfile(png_path, public_png)
+            public_file = public_png
+        else:
+            public_file = public_svg
 
-        #     arrows = entry.get("Arrows", [])
-        #     if not isinstance(arrows, list):
-        #         continue
-
-        #     for arrow in arrows:
-        #         if not (isinstance(arrow, list) and len(arrow) == 2):
-        #             continue
-        #         tgt_app, tgt_comp = arrow
-        #         target = f"{str(tgt_app).strip().lower()}_{str(tgt_comp).strip().lower()}"
-
-        #         if source in all_nodes and target in all_nodes:
-        #             edge = (source, target)
-        #             if edge not in edges_added:
-        #                 dot.edge(source, target)
-        #                 edges_added.add(edge)
-
-        # === Step 8: Render diagram ===
-        dot.render(output_image_path, format="png", view=False)
-        # from PIL import Image
-        # output_image_path += ".png"
-        # # Resize final PNG to exactly 3000x3000
-        # img = Image.open(output_image_path)
-        # img = img.resize((2000, 2000), Image.LANCZOS)
-        # img.save(output_image_path)
+        message = "Deployment diagram generated successfully."
+        if graphviz_error:
+            message += " Graphviz PNG was unavailable, so an SVG diagram was generated instead."
 
         return {
             "status": "success",
-            "message": "✅ Deployment diagram generated successfully.",
-            "data": output_image_path + ".png"
+            "message": message,
+            "data": public_file.replace("\\", "/"),
         }
 
     except Exception as e:
         return {
             "status": "error",
-            "message": f"❌ Tool4 failed: {str(e)}",
+            "message": f"Tool4 failed: {str(e)}",
             "data": None
         }
+
+
+@tool
+def generate_deployment_diagram() -> dict:
+    """
+    Generates a deployment diagram using the system mapping CSV (with NodeName) and enriched logs.
+    Components are grouped under servers, and edges are based on inter-component arrows.
+    Returns a dictionary with status, message, and image path.
+    """
+    return build_deployment_diagram()

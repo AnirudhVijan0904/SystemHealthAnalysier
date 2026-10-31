@@ -93,12 +93,13 @@ Note: Do NOT return any explanation. Only return **true** or **false**. This is 
 
 from agent_code.agent.llm_handler import llm_json
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from ollama import Client
 import os
 import re
 from datetime import datetime
 from agent_code.ui_integrator import analysis
+from agent_code.tools.tool4 import build_deployment_diagram
 from flask import request, jsonify
 from datetime import datetime
 from datetime import datetime
@@ -113,6 +114,30 @@ def get_time():
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+
+def _diagram_file():
+    png = os.path.join("static", "final_output.png")
+    svg = os.path.join("static", "final_output.svg")
+    if os.path.exists(png):
+        return "static", "final_output.png", "image/png", "deployment_diagram.png"
+    return "static", "final_output.svg", "image/svg+xml", "deployment_diagram.svg"
+
+@app.route("/diagram")
+def diagram():
+    folder, name, mime, _download_name = _diagram_file()
+    return send_from_directory(folder, name, mimetype=mime)
+
+@app.route("/diagram/download")
+def diagram_download():
+    folder, name, mime, download_name = _diagram_file()
+    return send_from_directory(
+        folder,
+        name,
+        mimetype=mime,
+        as_attachment=True,
+        download_name=download_name,
+    )
 
 # def load_file(path):
 #     with open(path, 'r', encoding='utf-8') as f:
@@ -128,6 +153,35 @@ app.secret_key = os.urandom(24)
 #     ])
 #     return response['message']['content']
 from app2 import task3
+
+def asked_why_this_is_happening(text):
+    q = (text or "").lower()
+    phrases = (
+        "why this is happening",
+        "why is this happening",
+        "why is it happening",
+        "why this happening",
+        "why is that happening",
+        "why that's happening",
+        "why thats happening",
+    )
+    if any(p in q for p in phrases):
+        return True
+    return "why" in q and "happen" in q
+
+def should_show_diagram(question, rephrased, result):
+    asked = f"{question or ''} {rephrased or ''}".lower()
+    if asked_why_this_is_happening(question) or asked_why_this_is_happening(rephrased):
+        return True
+    visualize_words = (
+        "visual", "diagram", "architecture", "picture", "draw", "graph",
+        "show me the issue", "map of",
+    )
+    if any(word in asked for word in visualize_words):
+        return True
+    result_l = (result or "").lower()
+    return "final_output.svg" in result_l or "final_output.png" in result_l
+
 @app.route('/')
 def index():
     return render_template("index.html")
@@ -175,9 +229,12 @@ def ask():
         with open("analysis_output.txt", "w", encoding='utf-8') as f:
             f.write(result)
 
-        response_data = {"response": result}
-        if "deployment diagram" in result.lower():
-            response_data["image_url"] = "/static/final_output.png"
+        response_data = {"response": result, "timestamp": get_time()}
+        if should_show_diagram(question, question1, result):
+            diagram = build_deployment_diagram()
+            if diagram.get("status") == "success" and diagram.get("data"):
+                response_data["image_url"] = "/diagram"
+                response_data["download_url"] = "/diagram/download"
 
         return jsonify(response_data)
 
