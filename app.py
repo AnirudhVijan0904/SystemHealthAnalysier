@@ -1,4 +1,10 @@
+import sys
 
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 
 from langchain.prompts import ChatPromptTemplate
 from agent_code.agent.llm_handler import llm_json
@@ -157,12 +163,12 @@ def ask():
             result = analysis(question1)
         else:
             result = task3(question1)
-        with open('agent_code/data/chat_memory_log.txt', 'r') as f:
+        with open('agent_code/data/chat_memory_log.txt', 'r', encoding='utf-8') as f:
             hist=f.read()
 
         hist+=f'\nhuman:{question1}\nai: {result}'
 
-        with open('agent_code/data/chat_memory_log.txt', 'w') as f:
+        with open('agent_code/data/chat_memory_log.txt', 'w', encoding='utf-8') as f:
             f.write(hist)
 
 

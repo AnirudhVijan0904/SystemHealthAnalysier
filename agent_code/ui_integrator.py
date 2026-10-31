@@ -11,7 +11,7 @@ def save_memory_to_textfile(memory, file_path="agent_code/data/chat_memory_log.t
             role = getattr(msg, "type", msg.__class__.__name__.replace("Message", ""))
             content = getattr(msg, "content", str(msg))
             f.write(f"{role}: {content}\n")
-    print(f"✅ Chat history saved to {file_path}")
+    print(f"Chat history saved to {file_path}")
 
 
 

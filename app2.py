@@ -344,7 +344,8 @@ def load_file(path):
 def task3(question):
     # Load enriched logs
    
-    file_path = r"C:\Users\AnirudhVijan\Desktop\project2\Coding\prot5\q\agent_code\data\enriched_logs.json"
+    data_dir = os.path.join("agent_code", "data")
+    file_path = os.path.join(data_dir, "enriched_logs.json")
 
     if not os.path.exists(file_path):
         generate_deployment_diagram()
@@ -353,9 +354,12 @@ def task3(question):
     with open(file_path, "r", encoding="utf-8") as f:
         parsed_data = json.load(f)
 
-    # Load CMDB and format it
-    cmdb_df = pd.read_csv(r"C:\Users\AnirudhVijan\Desktop\project2\Coding\prot5\q\agent_code\data\cmdb_with_languages.csv")
-    cmdb_df = cmdb_df[["ID", "App", "Component", "ProgrammingLanguage"]]
+    cmdb_path = os.path.join(data_dir, "cmdb_with_languages.csv")
+    if not os.path.exists(cmdb_path):
+        cmdb_path = os.path.join(data_dir, "bank_system_components.csv")
+    cmdb_df = pd.read_csv(cmdb_path)
+    preferred_cols = ["ID", "App", "Component", "ProgrammingLanguage", "NodeType", "NodeName"]
+    cmdb_df = cmdb_df[[c for c in preferred_cols if c in cmdb_df.columns]]
     cmdb_text = cmdb_df.to_string(index=False)
     print(2)
     # # Format the logs into a clean string for LLM
